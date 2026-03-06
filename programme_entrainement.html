@@ -437,20 +437,20 @@
 
   <div class="summary-bar">
     <div class="summary-card">
-      <div class="summary-value">36</div>
+      <div class="summary-value" id="stat-exercises">—</div>
       <div class="summary-label">Exercices</div>
     </div>
     <div class="summary-card">
-      <div class="summary-value">5</div>
-      <div class="summary-label">Jours actifs</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-value">120+</div>
+      <div class="summary-value" id="stat-series">—</div>
       <div class="summary-label">Séries / semaine</div>
     </div>
     <div class="summary-card">
-      <div class="summary-value">3</div>
-      <div class="summary-label">Types d'effort</div>
+      <div class="summary-value" id="stat-inputs">—</div>
+      <div class="summary-label">Champs charges</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value" id="stat-filled">0%</div>
+      <div class="summary-label">Progression</div>
     </div>
   </div>
 
@@ -826,12 +826,35 @@
     }
   }
 
+  function computeStats() {
+    const rows = document.querySelectorAll('tbody tr');
+    let totalSeries = 0;
+    rows.forEach(row => {
+      const badge = row.querySelector('.sets-badge');
+      if (badge) {
+        const val = parseInt(badge.textContent);
+        if (!isNaN(val)) totalSeries += val;
+      }
+    });
+    const exercises = rows.length;
+    const inputs = document.querySelectorAll('.charge-input');
+    const filled = [...inputs].filter(i => i.value.trim() !== '').length;
+    const pct = inputs.length > 0 ? Math.round((filled / inputs.length) * 100) : 0;
+
+    document.getElementById('stat-exercises').textContent = exercises;
+    document.getElementById('stat-series').textContent = totalSeries;
+    document.getElementById('stat-inputs').textContent = filled + ' / ' + inputs.length;
+    document.getElementById('stat-filled').textContent = pct + '%';
+  }
+
   // Assign stable IDs and load on page ready
   window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.charge-input').forEach((input, i) => {
       input.dataset.id = 'input-' + i;
+      input.addEventListener('input', computeStats);
     });
     loadData();
+    computeStats();
   });
 </script>
 </body>
